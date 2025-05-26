@@ -22,14 +22,11 @@ pipeline{
 				steps{
 					sh '''
 						scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/apache-tomcat-10.1.24/webapps/
-						sleep 20
-						cd /opt/tomcat/apache-tomcat-10.1.24/bin
-						./shutdown.sh
+						sleep 10
+						sudo /opt/tomcat/apache-tomcat-10.1.24/bin/shutdown.sh
 						sleep 5
-						./startup.sh
-						sleep 5
-						./startup.sh
-						'''
+						sudo /opt/tomcat/apache-tomcat-10.1.24/bin/startup.sh
+					'''
 				}
 			}
 			stage( 'Test' ){
