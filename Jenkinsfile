@@ -37,31 +37,31 @@ pipeline {
             agent { label 'deploy' }
             steps {
                 sh '''
-					echo test was successful
-					ip=$(curl -s http://checkip.amazonaws.com)
-					echo " Access the Deployed application from the link http://$ip:8080/demo-0.0.1-SNAPSHOT"
-				'''
+                    echo "Test was successful"
+                '''
             }
         }
+    }
 
     post {
         success {
             script {
-                def appUrl = "http://$ip:8080/demo-0.0.1-SNAPSHOT"
+                // Get the public IP of the current node
+                def ip = sh(script: "curl -s http://checkip.amazonaws.com", returnStdout: true).trim()
+                def appUrl = "http://${ip}:8080/demo-0.0.1-SNAPSHOT"
 
                 emailext(
-                    subject: "Deployment Successful",
+                    subject: "✅ Deployment Successful",
                     body: """
-							Hello Team,
+Hello Team,
 
-							The deployment of the application was successful.
+The deployment of the application was successful.
 
-							You can access the app here:
-							${appUrl}
+You can access the app here:
+${appUrl}
 
-							Build URL: ${env.BUILD_URL}
-							
-						""",
+Build URL: ${env.BUILD_URL}
+""",
                     to: 'prajwaldoddananjaiah@gmail.com'
                 )
             }
@@ -69,18 +69,17 @@ pipeline {
 
         failure {
             emailext(
-                subject: "Deployment Failed",
+                subject: "❌ Deployment Failed",
                 body: """
-						Hello Team,
+Hello Team,
 
-						The Jenkins job has failed.
+The Jenkins job has failed.
 
-						Please check the console logs here:
-						${env.BUILD_URL}
-					""",
+Please check the console logs here:
+${env.BUILD_URL}
+""",
                 to: 'prajwaldoddananjaiah@gmail.com'
             )
         }
     }
 }
-
