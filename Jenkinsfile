@@ -15,7 +15,7 @@ pipeline {
                 sh '''
                     mvn clean install
                     sleep 20
-                    cp home/ubuntu/workspace/target/demo-0.0.1-SNAPSHOT.war /home/ubuntu/builds/
+                    cp /home/ubuntu/workspace/java-project/target/demo-0.0.1-SNAPSHOT.war /home/ubuntu/builds/
                 '''
             }
         }
