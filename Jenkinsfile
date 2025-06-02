@@ -24,7 +24,13 @@ pipeline {
             agent { label 'deploy' }
             steps {
                 sh '''
-                    /opt/tomcat/apache-tomcat-10.1.24/bin/shutdown.sh
+                   /opt/tomcat/apache-tomcat-10.1.24/bin/shutdown.sh
+                   echo "Waiting for Tomcat to stop..."
+                   while lsof -i :8080 >/dev/null 2>&1; do
+                   echo "Tomcat still running..."
+                   sleep 2
+                   done
+                   echo "Tomcat stopped."
                     sleep 5
                     scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/apache-tomcat-10.1.24/webapps/
                     sleep 5
@@ -42,44 +48,6 @@ pipeline {
                     echo "Access the Deployed application from the link http://$ip:8080/demo-0.0.1-SNAPSHOT"
                 '''
             }
-        }
-    }
-
-    post {
-        success {
-            script {
-                def appUrl = "http://$ip:8080/demo-0.0.1-SNAPSHOT"
-
-                emailext(
-                    subject: "Deployment Successful",
-                    body: """
-                        Hello Team,
-
-                        The deployment of the application was successful.
-
-                        You can access the app here:
-                        ${appUrl}
-
-                        Build URL: ${env.BUILD_URL}
-                    """,
-                    to: 'prajwaldoddananjaiah@gmail.com'
-                )
-            }
-        }
-
-        failure {
-            emailext(
-                subject: "Deployment Failed",
-                body: """
-                    Hello Team,
-
-                    The Jenkins job has failed.
-
-                    Please check the console logs here:
-                    ${env.BUILD_URL}
-                """,
-                to: 'prajwaldoddananjaiah@gmail.com'
-            )
         }
     }
 }
