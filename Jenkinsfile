@@ -27,7 +27,7 @@ pipeline {
                    sudo systemctl stop tomcat.service
                    sudo systemctl status tomcat.service
                    sleep 5
-                   scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/apache-tomcat-10.1.24/webapps/
+                   scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/webapps/
                    sleep 5
                    sudo systemctl start tomcat.service
                    sudo systemctl status tomcat.service
