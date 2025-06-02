@@ -14,7 +14,7 @@ pipeline {
             steps {
                 sh '''
                     mvn clean install
-                    sleep 20
+                    sleep 5
                     cp /home/ubuntu/workspace/java-project/target/demo-0.0.1-SNAPSHOT.war /home/ubuntu/builds/
                 '''
             }
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 sh '''
                     scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/apache-tomcat-10.1.24/webapps/
-                    sleep 20
+                    sleep 5
                     /opt/tomcat/apache-tomcat-10.1.24/bin/shutdown.sh
                     sleep 5
                     /opt/tomcat/apache-tomcat-10.1.24/bin/startup.sh
