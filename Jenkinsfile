@@ -24,7 +24,7 @@ pipeline {
             agent { label 'deploy' }
             steps {
                 sh '''
-                   scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/webapps/
+                   sudo scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/webapps/
                    sleep 5
                    sudo systemctl restart tomcat.service
                    sudo systemctl status tomcat.service
