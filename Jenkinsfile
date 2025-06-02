@@ -49,7 +49,7 @@ pipeline {
                                  <p>Application is deployed and accessible at: <a href="${appUrl}">${appUrl}</a></p>
                                  <p>See the Jenkins console output: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
                         mimeType: 'text/html',
-                        to: 'your.email@example.com'
+                        to: 'prajwaldoddananjaiah@gmail.com'
                     )
                 }
             }
