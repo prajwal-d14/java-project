@@ -14,21 +14,21 @@ pipeline {
             steps {
                 sh '''
                     mvn clean install
-                    sleep 20
+                    sleep 5
                     cp /home/ubuntu/workspace/java-project/target/demo-0.0.1-SNAPSHOT.war /home/ubuntu/builds/
                 '''
             }
         }
 
         stage('Deploy') {
-            agent { label 'deploy' }
+            agent { label "${ Environment }" }
             steps {
                 sh '''
-                    scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/apache-tomcat-10.1.24/webapps/
-                    sleep 20
-                    /opt/tomcat/apache-tomcat-10.1.24/bin/shutdown.sh
-                    sleep 5
-                    /opt/tomcat/apache-tomcat-10.1.24/bin/startup.sh
+                   scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war ~ && sudo mv ~/demo-0.0.1-SNAPSHOT.war /opt/tomcat/webapps/
+                   sleep 5
+                   sudo systemctl restart tomcat.service
+                   sudo systemctl status tomcat.service
+                   
                 '''
             }
         }
@@ -37,50 +37,21 @@ pipeline {
             agent { label 'deploy' }
             steps {
                 sh '''
-                    echo test was successful
-                    ip=$(curl -s http://checkip.amazonaws.com)
-                    echo "Access the Deployed application from the link http://$ip:8080/demo-0.0.1-SNAPSHOT"
+                    def ip = sh(script: "curl -s http://checkip.amazonaws.com", returnStdout: true).trim()
+                    def appUrl = "http://${ip}:8080/demo-0.0.1-SNAPSHOT"
+                    
+                    echo "Test was successful"
+                    echo "Access the Deployed application from the link: ${appUrl}"
                 '''
-            }
-        }
-    }
-
-    post {
-        success {
-            script {
-                def appUrl = "http://$ip:8080/demo-0.0.1-SNAPSHOT"
-
-                emailext(
-                    subject: "Deployment Successful",
-                    body: """
-                        Hello Team,
-
-                        The deployment of the application was successful.
-
-                        You can access the app here:
-                        ${appUrl}
-
-                        Build URL: ${env.BUILD_URL}
-                    """,
-                    to: 'prajwaldoddananjaiah@gmail.com'
+				emailext (
+                        subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+                        body: """<p>Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' has finished with status: <b>${currentBuild.currentResult}</b></p>
+                                 <p>Application is deployed and accessible at: <a href="${appUrl}">${appUrl}</a></p>
+                                 <p>See the Jenkins console output: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+                        mimeType: 'text/html',
+                        to: 'prajwaldoddananjaiah@gmail.com'
                 )
             }
         }
-
-        failure {
-            emailext(
-                subject: "Deployment Failed",
-                body: """
-                    Hello Team,
-
-                    The Jenkins job has failed.
-
-                    Please check the console logs here:
-                    ${env.BUILD_URL}
-                """,
-                to: 'prajwaldoddananjaiah@gmail.com'
-            )
-        }
     }
 }
-
