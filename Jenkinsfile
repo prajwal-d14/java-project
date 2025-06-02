@@ -40,6 +40,7 @@ pipeline {
                     echo test was successful
                     ip=$(curl -s http://checkip.amazonaws.com)
                     echo "Access the Deployed application from the link http://$ip:8080/demo-0.0.1-SNAPSHOT"
+                    emailext attachLog: true, body: 'The Deployment was succesful.', subject: 'Deployment Result', to: 'prajwaldoddananjaiah@gmail.com'
                 '''
             }
         }
