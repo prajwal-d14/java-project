@@ -24,17 +24,14 @@ pipeline {
             agent { label 'deploy' }
             steps {
                 sh '''
-                   /opt/tomcat/apache-tomcat-10.1.24/bin/shutdown.sh
-                   echo "Waiting for Tomcat to stop..."
-                   while lsof -i :8080 >/dev/null 2>&1; do
-                   echo "Tomcat still running..."
-                   sleep 2
-                   done
-                   echo "Tomcat stopped."
-                    sleep 5
-                    scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/apache-tomcat-10.1.24/webapps/
-                    sleep 5
-                    /opt/tomcat/apache-tomcat-10.1.24/bin/startup.sh
+                   sudo systemctl stop tomcat.service
+                   sudo systemctl status tomcat.service
+                   sleep 5
+                   scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war /opt/tomcat/apache-tomcat-10.1.24/webapps/
+                   sleep 5
+                   sudo systemctl start tomcat.service
+                   sudo systemctl status tomcat.service
+                   
                 '''
             }
         }
