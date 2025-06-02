@@ -1,6 +1,9 @@
 pipeline {
     agent none
-
+    parameters {
+        choice(name: 'Environment', choices: ['qa', 'prod'], description: 'Select environment to deploy')
+    }
+  
     stages {
         stage('SCM Checkout') {
             agent { label 'compile' }
@@ -21,7 +24,7 @@ pipeline {
         }
 
         stage('Deploy') {
-            agent { label "${ Environment }" }
+            agent { label "${params.Environment.toLowerCase()}" }
             steps {
                 sh '''
                    scp ubuntu@172.31.7.95:/home/ubuntu/builds/demo-0.0.1-SNAPSHOT.war ~ && sudo mv ~/demo-0.0.1-SNAPSHOT.war /opt/tomcat/webapps/
