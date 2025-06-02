@@ -37,7 +37,7 @@ pipeline {
         }
 
         stage('Test') {
-            agent { label 'deploy' }
+            agent { label 'compile' }
             steps {
                 sh '''
                     def ip = sh(script: "curl -s http://checkip.amazonaws.com", returnStdout: true).trim()
