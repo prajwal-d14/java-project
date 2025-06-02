@@ -37,13 +37,21 @@ pipeline {
             agent { label 'deploy' }
             steps {
                 sh '''
-                    echo test was successful
-                    ip=$(curl -s http://checkip.amazonaws.com)
-                    echo "Access the Deployed application from the link http://$ip:8080/demo-0.0.1-SNAPSHOT"
-                    emailext attachLog: true, body: 'The Deployment was succesful.', subject: 'Deployment Result', to: 'prajwaldoddananjaiah@gmail.com'
+                    def ip = sh(script: "curl -s http://checkip.amazonaws.com", returnStdout: true).trim()
+                    def appUrl = "http://${ip}:8080/demo-0.0.1-SNAPSHOT"
+                    
+                    echo "Test was successful"
+                    echo "Access the Deployed application from the link: ${appUrl}"
                 '''
+				emailext (
+                        subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+                        body: """<p>Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' has finished with status: <b>${currentBuild.currentResult}</b></p>
+                                 <p>Application is deployed and accessible at: <a href="${appUrl}">${appUrl}</a></p>
+                                 <p>See the Jenkins console output: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+                        mimeType: 'text/html',
+                        to: 'prajwaldoddananjaiah@gmail.com'
+                )
             }
         }
     }
 }
-
