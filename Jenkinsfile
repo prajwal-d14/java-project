@@ -44,7 +44,7 @@ pipeline {
 					def appUrl = "http://${ip}:8080/demo-0.0.1-SNAPSHOT"
             
 					echo "Test was successful"
-					echo "Access the Deployed application from the link: ${appUrl}"
+					echo "Access the deployed application from the link: ${appUrl}"
 
 					emailext (
 					subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
