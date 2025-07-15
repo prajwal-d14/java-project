@@ -35,7 +35,7 @@ pipeline {
                 withSonarQubeEnv("${SONAR_SERVER}") {
                     sh '''
 					   /opt/sonar-scanner/bin/sonar-scanner \
-					   -Dsonar.projectKey=java-project \
+					   -Dsonar.projectKey=javaproject \
 					   -Dsonar.projectName="Java Project" \
 					   -Dsonar.sources=src \
 					   -Dsonar.java.binaries=target/classes
