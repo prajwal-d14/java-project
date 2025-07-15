@@ -29,13 +29,13 @@ pipeline {
             steps {
                 sh '''
                    scp -o StrictHostKeyChecking=no ubuntu@172.31.0.111:/home/ubuntu/builds/myapp-1.0.war /home/ubuntu/
- && sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/
+ 		   sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/
                    sleep 5
                    sudo systemctl restart tomcat.service
-                   sudo systemctl status tomcat.service
-                   
+                   sudo systemctl status tomcat.service 
                 '''
             }
+
         }
 
         stage('Test') {
