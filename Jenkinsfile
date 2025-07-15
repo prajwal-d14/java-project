@@ -38,7 +38,7 @@ pipeline {
         }
 
         stage('Test') {
-            agent { label 'deploy' }
+            agent { label "${params.Environment.toLowerCase()}" }
             steps {
                 sh '''
                     def ip = sh(script: "curl -s http://checkip.amazonaws.com", returnStdout: true).trim()
