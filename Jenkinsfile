@@ -42,7 +42,7 @@ pipeline {
 	    steps {
 	        script {
 			def ip = sh(script: "curl -s http://checkip.amazonaws.com", returnStdout: true).trim()
-			def appUrl = "http://${ip}:8080/myapp-1.0.war"
+			def appUrl = "http://${ip}:8080/myapp-1.0"
 			echo "Test was successful"
 			echo "Access the Deployed application from the link: ${appUrl}"
 
