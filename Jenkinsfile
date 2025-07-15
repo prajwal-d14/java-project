@@ -48,12 +48,10 @@ pipeline {
             agent { label "${params.Environment.toLowerCase()}" }
             steps {
                 sh '''
-                   scp -o StrictHostKeyChecking=no /home/ubuntu/builds/myapp-1.0.war ubuntu@172.31.0.111:/home/ubuntu/
-                   ssh ubuntu@172.31.0.111 "
-                       sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/ &&
-                       sudo systemctl restart tomcat &&
-                       sudo systemctl status tomcat
-                   "
+                   scp -o StrictHostKeyChecking=no ubuntu@172.31.0.111:/home/ubuntu/builds/myapp-1.0.war /home/ubuntu/
+                   sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/ 
+                   sudo systemctl restart tomcat 
+                   sudo systemctl status tomcat
                 '''
             }
         }
