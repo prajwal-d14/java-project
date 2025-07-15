@@ -28,7 +28,7 @@ pipeline {
             agent { label "${params.Environment.toLowerCase()}" }
             steps {
                 sh '''
-                   scp ubuntu@172.31.7.95:/home/ubuntu/builds/myapp-1.0.war ~ && sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/
+                   scp ubuntu@172.31.0.111:/home/ubuntu/builds/myapp-1.0.war && sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/
                    sleep 5
                    sudo systemctl restart tomcat.service
                    sudo systemctl status tomcat.service
