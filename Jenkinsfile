@@ -28,7 +28,7 @@ pipeline {
             agent { label "${params.Environment.toLowerCase()}" }
             steps {
                 sh '''
-                   scp ubuntu@172.31.0.111:/home/ubuntu/builds/myapp-1.0.war && sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/
+                   scp ubuntu@172.31.0.111:/home/ubuntu/builds/myapp-1.0.war /home/ubuntu && sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/
                    sleep 5
                    sudo systemctl restart tomcat.service
                    sudo systemctl status tomcat.service
@@ -42,7 +42,7 @@ pipeline {
             steps {
                 sh '''
                     def ip = sh(script: "curl -s http://checkip.amazonaws.com", returnStdout: true).trim()
-                    def appUrl = "http://${ip}:8080/demo-0.0.1-SNAPSHOT"
+                    def appUrl = "http://${ip}:8080/myapp-1.0"
                     
                     echo "Test was successful"
                     echo "Access the Deployed application from the link: ${appUrl}"
