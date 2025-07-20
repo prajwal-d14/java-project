@@ -50,7 +50,7 @@ pipeline {
                                         makeEmptyDirs: false,
                                         noDefaultExcludes: false,
                                         patternSeparator: '[, ]+',
-                                        remoteDirectory: '/home/ubuntu',
+                                        remoteDirectory: '/home/ubuntu/java-project/',
                                         remoteDirectorySDF: false,
                                         removePrefix: '',
                                         sourceFiles: 'deployment.yml'
