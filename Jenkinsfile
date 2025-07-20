@@ -1,11 +1,12 @@
-pipeline{
-	agent none
-	
-	environment {
-	   IMAGE = "14prajwal/my-app.1"
-       DOCKERHUB_CREDENTIALS=credentials('dockerhub-creds-id')  
+pipeline {
+    agent none
+
+    environment {
+        IMAGE = "14prajwal/my-app.1"
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds-id')  
     }
-	stages {
+
+    stages {
         stage('SCM Checkout') {
             agent { label 'image' }
             steps {
@@ -16,11 +17,12 @@ pipeline{
         stage('Build') {
             agent { label 'image' }
             steps {
-				sh "docker build -t $IMAGE ."
+                sh "docker build -t $IMAGE ."
             }
         }
 
-		 stage('Push Image') {
+        stage('Push Image') {
+            agent { label 'image' }
             steps {
                 sh '''
                     echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin
@@ -28,13 +30,39 @@ pipeline{
                 '''
             }
         }
-		
-		stage('Deploy to Kubernetes Environment') {
-			agent { label 'image' }
+
+        stage('Deploy to Kubernetes Environment') {
+            agent { label 'image' }
             steps {
-				script {
-					sshPublisher(publishers: [sshPublisherDesc(configName: 'kubemaster', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'kubectl apply -f /home/ubuntu/java-project/deployment.yml', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/home/ubuntu', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'deployment.yml')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)]}				
-			}
-    	}
-	}
-}	
+                script {
+                    sshPublisher(
+                        publishers: [
+                            sshPublisherDesc(
+                                configName: 'kubemaster',
+                                transfers: [
+                                    sshTransfer(
+                                        cleanRemote: false,
+                                        excludes: '',
+                                        execCommand: 'kubectl apply -f /home/ubuntu/java-project/deployment.yml',
+                                        execTimeout: 120000,
+                                        flatten: false,
+                                        makeEmptyDirs: false,
+                                        noDefaultExcludes: false,
+                                        patternSeparator: '[, ]+',
+                                        remoteDirectory: '/home/ubuntu',
+                                        remoteDirectorySDF: false,
+                                        removePrefix: '',
+                                        sourceFiles: 'deployment.yml'
+                                    )
+                                ],
+                                usePromotionTimestamp: false,
+                                useWorkspaceInPromotion: false,
+                                verbose: false
+                            )
+                        ]
+                    )
+                }
+            }
+        }
+    }
+}
