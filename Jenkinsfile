@@ -46,8 +46,8 @@ pipeline {
                                         excludes: '',
                                         execCommand:'''
                                             'kubectl apply -f /home/ubuntu/home/ubuntu/deployment.yml'
-                                            'kubectl apply -f /home/ubuntu/home/ubuntu/java-project/service.yaml',
-                                        '''    
+                                            'kubectl apply -f /home/ubuntu/home/ubuntu/java-project/service.yaml'
+                                        ''',    
                                         execTimeout: 120000,
                                         flatten: false,
                                         makeEmptyDirs: false,
