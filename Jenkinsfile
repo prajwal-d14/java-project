@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         IMAGE = "14prajwal/my-app.1"
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')  
     }
 
     stages {
@@ -24,10 +23,12 @@ pipeline {
         stage('Push Image') {
             agent { label 'image' }
             steps {
-                sh '''
-                    echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin
-                    docker push $IMAGE
-                '''
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push $IMAGE
+                    '''
+                }
             }
         }
 
