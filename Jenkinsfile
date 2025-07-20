@@ -1,82 +1,41 @@
-pipeline {
-    agent none
-
-    parameters {
-        choice(name: 'Environment', choices: ['dev', 'qa', 'prod'], description: 'Select environment to deploy')
+pipeline{
+	agent none
+	
+	environment {
+	   IMAGE = "14prajwal/my-app.1"
+       DOCKERHUB_CREDENTIALS=credentials('dockerhub-creds-id')  
     }
-
-    environment {
-        SONAR_SERVER = 'SonarServer' 
-        SONAR_URL = 'http://43.205.214.225:9000/'  
-    }
-
-    stages {
+	stages {
         stage('SCM Checkout') {
-            agent { label 'compile' }
+            agent { label 'image' }
             steps {
                 git branch: 'main', url: 'https://github.com/prajwal-d14/java-project.git'
             }
         }
 
         stage('Build') {
-            agent { label 'compile' }
+            agent { label 'image' }
+            steps {
+				sh "docker build -t $IMAGE ."
+            }
+        }
+
+		 stage('Push Image') {
             steps {
                 sh '''
-                    mvn clean install
-                    sleep 5
-                    cp /home/ubuntu/workspace/java-project/target/myapp-1.0.war /home/ubuntu/builds/
+                    echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin
+                    docker push $IMAGE
                 '''
             }
         }
-
-        stage('SonarQube Analysis') {
-            agent { label 'compile' }
+		
+		stage('Deploy to Kubernetes Environment') {
+			agent { label 'image' }
             steps {
-                withSonarQubeEnv("${SONAR_SERVER}") {
-                    sh '''
-					   /opt/sonar-scanner/bin/sonar-scanner \
-					   -Dsonar.projectKey=javaproject \
-					   -Dsonar.projectName="Java Project" \
-					   -Dsonar.sources=src \
-					   -Dsonar.java.binaries=target/classes
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy') {
-            agent { label "${params.Environment.toLowerCase()}" }
-            steps {
-                sh '''
-                   scp -o StrictHostKeyChecking=no ubuntu@172.31.0.111:/home/ubuntu/builds/myapp-1.0.war /home/ubuntu/
-                   sudo mv ~/myapp-1.0.war /opt/tomcat/webapps/ 
-                   sudo systemctl restart tomcat 
-                   sudo systemctl status tomcat
-                '''
-            }
-        }
-
-        stage('Test') {
-            agent { label "${params.Environment.toLowerCase()}" }
-            steps {
-                script {
-                    def ip = sh(script: "curl -s http://checkip.amazonaws.com", returnStdout: true).trim()
-                    def appUrl = "http://${ip}:8080/myapp-1.0"
-
-                    echo "Test was successful"
-                    echo "Access the Deployed application from the link: ${appUrl}"
-
-                    emailext (
-                        subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
-                        body: """<p>Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' has finished with status: <b>${currentBuild.currentResult}</b></p>
-                                 <p>Application is deployed and accessible at: <a href="${appUrl}">${appUrl}</a></p>
-                                 <p>SonarQube Code Quality Report: <a href="${env.SONAR_URL}/dashboard?id=java-project">${env.SONAR_URL}/dashboard?id=java-project</a></p>
-                                 <p>See the Jenkins console output: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                        mimeType: 'text/html',
-                        to: 'prajwaldoddananjaiah@gmail.com'
-                    )
-                }
-            }
-        }
-    }
-}
+				script {
+					sshPublisher(publishers: [sshPublisherDesc(configName: 'kubemaster', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'kubectl apply -f /home/ubuntu/java-project/deployment.yml', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/home/ubuntu', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'deployment.yml')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)]
+				}
+			}
+    	}
+	}
+}	
