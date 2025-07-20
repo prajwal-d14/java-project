@@ -33,8 +33,7 @@ pipeline{
 			agent { label 'image' }
             steps {
 				script {
-					sshPublisher(publishers: [sshPublisherDesc(configName: 'kubemaster', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'kubectl apply -f /home/ubuntu/java-project/deployment.yml', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/home/ubuntu', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'deployment.yml')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)]
-				}
+					sshPublisher(publishers: [sshPublisherDesc(configName: 'kubemaster', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'kubectl apply -f /home/ubuntu/java-project/deployment.yml', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/home/ubuntu', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'deployment.yml')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)]}				
 			}
     	}
 	}
