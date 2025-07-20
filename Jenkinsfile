@@ -44,7 +44,7 @@ pipeline {
                                     sshTransfer(
                                         cleanRemote: false,
                                         excludes: '',
-                                        execCommand: 'kubectl apply -f deployment.yaml',  
+                                        execCommand: 'kubectl apply -f deployment.yml',  
                                         execTimeout: 120000,
                                         flatten: false,
                                         makeEmptyDirs: false,
