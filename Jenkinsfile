@@ -44,9 +44,7 @@ pipeline {
                                     sshTransfer(
                                         cleanRemote: false,
                                         excludes: '',
-                                        execCommand:'''
-                                            'kubectl apply -f /home/ubuntu/home/ubuntu/java-project/deployment.yml'
-                                        ''',    
+                                        execCommand: '/usr/bin/kubectl apply -f /home/ubuntu/home/ubuntu/java-project/deployment.yml',  
                                         execTimeout: 120000,
                                         flatten: false,
                                         makeEmptyDirs: false,
