@@ -1,69 +1,44 @@
 pipeline {
-    agent none
+	agent none
 
-    environment {
-        IMAGE = "14prajwal/my-app.1"
-    }
+		environment {
+			SONAR_SERVER = 'SonarServer'
+				SONAR_URL = 'http://13.203.158.19:30123/'
+		}
 
-    stages {
-        stage('SCM Checkout') {
-            agent { label 'image' }
-            steps {
-                git branch: 'main', url: 'https://github.com/prajwal-d14/java-project.git'
-            }
-        }
+	stages {
+		stage('SCM Checkout') {
+			agent { label 'compile' }
+			steps {
+				git branch: 'main', url: 'https://github.com/prajwal-d14/java-project.git'
+			}
+		}
 
-        stage('Build') {
-            agent { label 'image' }
-            steps {
-                sh "docker build -t $IMAGE ."
-            }
-        }
+		stage('SonarQube Analysis') {
+			agent { label 'compile' }
+			steps {
+				withSonarQubeEnv("${SONAR_SERVER}") {
+					sh '''
+						/opt/sonar-scanner/bin/sonar-scanner \
+						-Dsonar.projectKey=javaproject \
+						-Dsonar.projectName="Java Project" \
+						-Dsonar.sources=src \
+						-Dsonar.java.binaries=target/classes
+						'''
+				}
+			}
+		}
 
-        stage('Push Image') {
-            agent { label 'image' }
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push $IMAGE
-                    '''
-                }
-            }
-        }
 
-        stage('Deploy to Kubernetes Environment') {
-            agent { label 'image' }
-            steps {
-                script {
-                    sshPublisher(
-                        publishers: [
-                            sshPublisherDesc(
-                                configName: 'kubemaster',
-                                transfers: [
-                                    sshTransfer(
-                                        cleanRemote: false,
-                                        excludes: '',
-                                        execCommand: 'kubectl apply -f deployment.yml',  
-                                        execTimeout: 120000,
-                                        flatten: false,
-                                        makeEmptyDirs: false,
-                                        noDefaultExcludes: false,
-                                        patternSeparator: '[, ]+',
-                                        remoteDirectory: '.', 
-                                        remoteDirectorySDF: false,
-                                        removePrefix: '',
-                                        sourceFiles: 'deployment.yml'
-                                    )
-                                ],
-                                usePromotionTimestamp: false,
-                                useWorkspaceInPromotion: false,
-                                verbose: false
-                            )
-                        ]
-                    )
-                }
-            }
-        }
-    }
-}
+		stage('Build') {
+			agent { label 'compile' }
+			steps {
+				sh '''
+					mvn clean install
+					sleep 5
+					cp /home/ubuntu/workspace/java-project/target/myapp-1.0.war /home/ubuntu/builds/
+					'''
+			}
+		}
+	}
+}	
