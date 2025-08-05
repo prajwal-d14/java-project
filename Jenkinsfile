@@ -45,7 +45,7 @@ pipeline {
         stage('Upload Artifact to Nexus') {
             agent { label 'compile' }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDS', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
                         curl -u $USERNAME:$PASSWORD \
                           --upload-file ~/builds/myapp-1.0.war \
@@ -58,7 +58,7 @@ pipeline {
         stage('Docker Image Creation') {
             agent { label 'image' }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'NEXUS_CRED', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                     sh """
                         docker build \
                           --build-arg NEXUS_USER=$NEXUS_USER \
