@@ -61,7 +61,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                   sh """
                     docker build \
-                       --build-arg NEXUS_USER=admin \
+                       --build-arg NEXUS_USER=${USERNAME} \
                        --build-arg NEXUS_PASS=${PASSWORD} \
                        --build-arg NEXUS_URL=http://13.203.219.176:31020/repository/artifact-repo/myapp/myapp-1.0.war \
                        -t myapp:1.0 .
