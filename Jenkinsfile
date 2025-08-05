@@ -1,6 +1,6 @@
 pipeline {
     agent none
-	
+
     environment {
         SONAR_SERVER = 'SonarServer' 
         SONAR_URL = 'http://43.205.214.225:9000/'
@@ -47,8 +47,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDS', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
-                        curl -u $USERNAME:$PASSWORD \\
-                          --upload-file ~/builds/myapp-1.0.war \\
+                        curl -u $USERNAME:$PASSWORD \
+                          --upload-file ~/builds/myapp-1.0.war \
                           $NEXUS_URL
                     """
                 }
@@ -60,10 +60,10 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'NEXUS_CRED', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
                     sh """
-                        docker build \\
-                          --build-arg NEXUS_USER=$NEXUS_USER \\
-                          --build-arg NEXUS_PASS=$NEXUS_PASS \\
-                          --build-arg NEXUS_URL=$NEXUS_URL \\
+                        docker build \
+                          --build-arg NEXUS_USER=$NEXUS_USER \
+                          --build-arg NEXUS_PASS=$NEXUS_PASS \
+                          --build-arg NEXUS_URL=$NEXUS_URL \
                           -t myapp:1.0 .
                     """
                 }
@@ -73,13 +73,11 @@ pipeline {
         stage('Docker Image Push to Nexus') {
             agent { label 'image' }
             steps {
-                    sh """
-                        docker tag myapp:1.0 $DOCKER_IMAGE
-                        docker push $DOCKER_IMAGE
-                    """
-                }
+                sh """
+                    docker tag myapp:1.0 $DOCKER_IMAGE
+                    docker push $DOCKER_IMAGE
+                """
             }
         }
     }
 }
-
