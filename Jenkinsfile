@@ -61,8 +61,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
                         docker build \
-                          --build-arg NEXUS_USER=$NEXUS_USER \
-                          --build-arg NEXUS_PASS=$NEXUS_PASS \
+                          --build-arg NEXUS_USER=$USERNAME \
+                          --build-arg NEXUS_PASS=$PASSWORD \
                           --build-arg NEXUS_URL=$NEXUS_URL \
                           -t myapp:1.0 .
                     """
