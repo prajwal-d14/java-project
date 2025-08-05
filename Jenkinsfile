@@ -59,7 +59,6 @@ pipeline {
             agent { label 'image' }
             steps {
                withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    def NEXUS_URL = "http://13.203.219.176:31020/repository/artifact-repo/myapp/myapp-1.0.war"
                   sh """
                     docker build \
                        --build-arg NEXUS_USER=$USERNAME \
