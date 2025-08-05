@@ -1,69 +1,85 @@
 pipeline {
     agent none
-
+	
     environment {
-        IMAGE = "14prajwal/my-app.1"
+        SONAR_SERVER = 'SonarServer' 
+        SONAR_URL = 'http://43.205.214.225:9000/'
+        NEXUS_URL = 'http://13.203.219.176:31020/repository/artifact-repo/myapp/myapp-1.0.war'
+        DOCKER_IMAGE = '13.203.219.176:31503/docker-repo/myapp:1.0'
     }
 
     stages {
         stage('SCM Checkout') {
-            agent { label 'image' }
+            agent { label 'compile' }
             steps {
                 git branch: 'main', url: 'https://github.com/prajwal-d14/java-project.git'
             }
         }
 
-        stage('Build') {
-            agent { label 'image' }
+        stage('SonarQube Analysis') {
+            agent { label 'compile' }
             steps {
-                sh "docker build -t $IMAGE ."
-            }
-        }
-
-        stage('Push Image') {
-            agent { label 'image' }
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withSonarQubeEnv("${SONAR_SERVER}") {
                     sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push $IMAGE
+                        /opt/sonar-scanner/bin/sonar-scanner \
+                        -Dsonar.projectKey=java-project \
+                        -Dsonar.projectName="Java Project" \
+                        -Dsonar.sources=src \
+                        -Dsonar.java.binaries=target/classes
                     '''
                 }
             }
         }
 
-        stage('Deploy to Kubernetes Environment') {
+        stage('Build') {
+            agent { label 'compile' }
+            steps {
+                sh '''
+                    mvn clean install
+                    sleep 5
+                    cp target/myapp-1.0.war ~/builds/
+                '''
+            }
+        }
+
+        stage('Upload Artifact to Nexus') {
+            agent { label 'compile' }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'NEXUS_CREDS', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh """
+                        curl -u $USERNAME:$PASSWORD \\
+                          --upload-file ~/builds/myapp-1.0.war \\
+                          $NEXUS_URL
+                    """
+                }
+            }
+        }
+
+        stage('Docker Image Creation') {
             agent { label 'image' }
             steps {
-                script {
-                    sshPublisher(
-                        publishers: [
-                            sshPublisherDesc(
-                                configName: 'kubemaster',
-                                transfers: [
-                                    sshTransfer(
-                                        cleanRemote: false,
-                                        excludes: '',
-                                        execCommand: 'kubectl apply -f deployment.yml',  
-                                        execTimeout: 120000,
-                                        flatten: false,
-                                        makeEmptyDirs: false,
-                                        noDefaultExcludes: false,
-                                        patternSeparator: '[, ]+',
-                                        remoteDirectory: '.', 
-                                        remoteDirectorySDF: false,
-                                        removePrefix: '',
-                                        sourceFiles: 'deployment.yml'
-                                    )
-                                ],
-                                usePromotionTimestamp: false,
-                                useWorkspaceInPromotion: false,
-                                verbose: false
-                            )
-                        ]
-                    )
+                withCredentials([usernamePassword(credentialsId: 'NEXUS_CRED', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    sh """
+                        docker build \\
+                          --build-arg NEXUS_USER=$NEXUS_USER \\
+                          --build-arg NEXUS_PASS=$NEXUS_PASS \\
+                          --build-arg NEXUS_URL=$NEXUS_URL \\
+                          -t myapp:1.0 .
+                    """
+                }
+            }
+        }
+
+        stage('Docker Image Push to Nexus') {
+            agent { label 'image' }
+            steps {
+                    sh """
+                        docker tag myapp:1.0 $DOCKER_IMAGE
+                        docker push $DOCKER_IMAGE
+                    """
                 }
             }
         }
     }
 }
+
