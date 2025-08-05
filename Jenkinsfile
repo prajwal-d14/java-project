@@ -58,11 +58,9 @@ pipeline {
         stage('Docker Image Creation') {
             agent { label 'image' }
             steps {
-               withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                   sh """
                     docker build -t myapp:1.0 .
                    """
-                }
             }
         }
 
