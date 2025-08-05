@@ -60,11 +60,7 @@ pipeline {
             steps {
                withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                   sh """
-                    docker build \
-                       --build-arg USERNAME=$USERNAME \
-                       --build-arg PASSWORD=$PASSWORD \
-                       --build-arg NEXUS_URL=$NEXUS_URL \
-                       -t myapp:1.0 .
+                    docker build -t myapp:1.0 .
                    """
                 }
             }
