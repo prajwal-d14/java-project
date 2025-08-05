@@ -58,7 +58,7 @@ pipeline {
         stage('Docker Image Creation') {
             agent { label 'image' }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
                         docker build \
                           --build-arg NEXUS_USER=$NEXUS_USER \
