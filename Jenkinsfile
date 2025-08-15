@@ -59,13 +59,8 @@ pipeline {
         stage('Docker Image Creation') {
             agent { label 'image' }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'nexus-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
-                         docker build \
-                        --build-arg NEXUS_USER=$USERNAME \
-                        --build-arg NEXUS_PASS=$PASSWORD \
-						--build-arg ARTIFACT_URL=http://65.1.108.247:31020/repository/java-artifact/myapp/myapp-1.0.war \
-                        -t myapp:1.0 .
+                         docker build -t myapp:1.0 .
                     """
 				}	
             } 
